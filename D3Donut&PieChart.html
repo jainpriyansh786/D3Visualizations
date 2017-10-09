@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+<head>
+<title> D3 Donut and Pie Chart</title>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<style type="text/css">
+	
+
+	svg {
+
+		border-style: groove;
+		margin-left: 350px;
+	}
+</style>
+
+</head>
+
+<body>
+	<p style="font-size: 50px ;color:#9CAEA9;font-family:verdana ; text-align: center;">Donut Chart & Pie Chart</p>
+
+	<script>
+
+		var data = [10,50,100 , 40 ,60];
+
+		var canvas = d3.select("body").append("svg").attr("width",700).attr("height",500);
+
+		var donut = canvas.append("g").attr("transform","translate(150,250)");
+
+		var pieChart11 = canvas.append("g").attr("transform","translate(550,250)");
+
+		//var arc = d3.arc().innerRadius(80).outerRadius(100).startAngle(0).endAngle(6.28);
+		var arc = d3.arc().innerRadius(70).outerRadius(100);
+
+		var pieChart1 = d3.arc().innerRadius(0).outerRadius(100);
+
+		var pie = d3.pie().value(function(d){return d ;});
+
+		//var colorScale = d3.scaleLinear().domain([10,d3.max(data)]).range(["#A9FFCB","#C1839F"]);
+
+		var colorScale = d3.scaleOrdinal().range(["#82AEB1","#93C6D6","#5A7684","#A7ACD9","#9E8FB2"]);
+
+		//donut.append("path").attr("d",arc).attr("fill","#5A7680");
+
+		var donutChart = donut.selectAll(".arc").data(pie(data)).enter().append("g").attr("class","arc");
+
+		donutChart.append("path").attr("d",arc).attr("fill",function(d){return colorScale(d.data);});
+
+		donutChart.append("text").attr("transform",function(d) { return "translate(" + arc.centroid(d) + ")"; })
+            .attr("text-anchor","middle").text(function(d){return d.data;});
+
+        var pieChart = pieChart11.selectAll(".pieChart1").data(pie(data)).enter().append("g").attr("class","pieChart1");
+
+		pieChart.append("path").attr("d",pieChart1).attr("fill",function(d){return colorScale(d.data);});
+
+		pieChart.append("text").attr("transform",function(d) { return "translate(" + arc.centroid(d) + ")"; })
+            .attr("text-anchor","middle").text(function(d){return d.data;});    
+		
+
+	</script>
+	</body>
+
+
+
+</html>
