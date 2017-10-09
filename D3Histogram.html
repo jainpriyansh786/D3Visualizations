@@ -1,0 +1,155 @@
+<!doctype html>
+<html>
+<head>
+<title> D3 tutorial BarChart</title>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+</head>
+<style>
+  
+  svg {
+
+
+    margin-left : auto;
+    margin-right:auto;
+    display: block;
+  }
+
+body {
+  font: 10px sans-serif;
+}
+
+.bar rect {
+  fill: steelblue;
+  shape-rendering: crispEdges;
+}
+
+.bar text {
+  fill: #fff;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+h1 {
+
+  text-align: center;
+}
+
+  
+</style>
+
+<body>
+	<div>
+   
+   <h1>Bar Chart </h1>
+  </div>
+
+	<script>
+		
+       var margin = {top:20,right:10,bottom:100,left:40} , 
+       width = 600 - margin.left - margin.right ; 
+       height = 500 - margin.top - margin.bottom ;
+
+
+       var canvas = d3.select("body").append("svg").attr("width",width + margin.left + margin.right + 100).attr("height",height + margin.top + margin.bottom).append("g").attr("transform","translate(" +margin.left +"," + margin.top+")");
+
+       var xscale = d3.scaleBand().rangeRound([0,width]).padding(0.4);
+
+       var yscale =d3.scaleLinear().rangeRound([height,0]);
+
+       var xaxis = d3.axisBottom(xscale).tickSize(5);
+
+       var yaxis = d3.axisLeft(yscale);
+
+
+
+       d3.csv("Country&GDP.csv",function(error, data){
+
+
+
+        if (error) {
+
+          console.log("Erorr loading data");
+        }
+
+        
+        data.forEach(function(d){
+
+          d.GDP = +d.GDP ;
+
+          d.Country = d.Country;
+
+          console.log(d.GDP);
+
+        })
+
+
+
+xscale.domain(data.map(function(d){
+
+          return d.Country;
+        }));
+
+yscale.domain([0 , d3.max(data , function(d){return d.GDP;})]);
+
+
+
+
+
+var barChart = canvas.selectAll("rect").data(data).enter().append("rect")
+.attr("width" , xscale.bandwidth())
+.attr("height", 0)
+.attr("y",height)
+.transition().duration(3000).delay(function(d,i){return i*200 ;}).attr("x",function(d){return xscale(d.Country);})
+.attr("y",function(d){return yscale(d.GDP);})
+.attr("height", function(d){return height - yscale(d.GDP)})
+.attr("fill", "steelblue");
+
+canvas.selectAll("text").data(data).enter().append("text").attr("y",height).transition().duration(3000).delay(function(d,i){return i*200 ;}).text(function(d){return d.GDP;}).attr("x",function(d){return xscale(d.Country)+ (xscale.bandwidth()/4);}).attr("y", function(d){return yscale(d.GDP)+12}).style("font-size","12px");
+
+
+
+
+canvas.append("g").attr("transform", "translate(0,"+ height +")").call(xaxis).selectAll("text").attr("transform","rotate(-30)")
+.attr("dx", "-.4em").attr("dy","2em" ).attr("class","xaxis-text").style("font-size","12px");
+
+
+canvas.append("g").attr("transform", "translate(0,0)").call(yaxis);
+
+
+
+
+
+
+
+
+
+
+});
+
+
+
+    
+
+
+
+
+
+
+
+	</script>
+
+  <div>
+   
+   <h1>Countries and GDP </h1>
+  </div>
+
+	</body>
+
+
+
+</html>
