@@ -1,0 +1,226 @@
+<!doctype html>
+<html>
+<head>
+<title> D3 LineChart Zoom Timeline</title>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+</head>
+<style>
+  
+  svg {
+
+
+    margin-left : auto;
+    margin-right:auto;
+    display: block;
+  }
+
+body {
+  font: 10px sans-serif;
+}
+
+.bar rect {
+  fill: steelblue;
+  shape-rendering: crispEdges;
+}
+
+.bar text {
+  fill: #fff;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+h1 {
+
+  text-align: center;
+}
+
+  
+</style>
+
+<body>
+	<div>
+   
+   <h1>Line Chart </h1>
+  </div>
+  
+
+	<script>
+		
+      var margin = {top:20,right:10,bottom:100,left:30} , 
+       width = 960  ; 
+       height = 500 ;
+       
+       var canvas = d3.select("body").append("svg").attr("width",width - margin.left - margin.right   ).attr("height",height + margin.top + margin.bottom).attr("transform","translate(" +margin.left +"," + margin.top+")");
+       var xscale = d3.scaleTime().range([0,width]);
+
+       var yscale =d3.scaleLinear().range([height,0]);
+
+       var xaxis = d3.axisBottom(xscale);
+
+       var yaxis = d3.axisLeft(yscale);
+
+
+       var parseDate = d3.timeParse("%Y-%m-%d");
+
+      /* var area = d3.area().x0(function(d){return xscale(d.date); }).y0(height).y1(function(d){return yscale(d.price); }).curve(d3.curveMonotoneX);*/
+
+       var area = d3.area()
+    .curve(d3.curveMonotoneX)
+    .x(function(d) { return xscale(d.date); })
+    .y0(height)
+    .y1(function(d) { return yscale(d.price); });
+
+       var zoom = d3.zoom().scaleExtent([1,32]).translateExtent([[0,0],[width,height]]).extent([[0,0],[width,height]]).on("zoom",zoomed);
+
+      // var zoom = d3.zoom().scaleExtent([1, 32]).translateExtent([[0, 0], [width, height]]).extent([[0, 0], [width, height]]).on("zoom", zoomed);
+
+    /*  canvas.append("defs").append("clipPath")
+    .attr("id", "clip")
+  .append("rect")
+    .attr("width", width)
+    .attr("height", height);*/
+
+
+       d3.csv("DowJones.csv",type , function(error, data){
+        
+        
+           if (error) throw error;
+        /*if (error) {
+
+          console.log("Erorr loading data");
+        }*/
+
+        
+      /*  data.forEach(function(d){
+          
+
+          d.date = parseTime(d.date) ;
+
+          d.price = +d.price;
+
+         //console.log(d.date);
+
+        });*/
+
+
+
+/*xscale.domain(d3.extent(data,function(d){
+
+          return d.date;
+        }));
+
+yscale.domain(d3.extent(data , function(d){return d.price;}));*/
+
+xscale.domain(d3.extent(data, function(d) { return d.date; }));
+  yscale.domain([0, d3.max(data, function(d) { return d.price; })]);
+
+/*canvas.append("path").datum(data).attr("class","area").attr("d",area).attr("fill","steelblue"); */ 
+
+canvas.append("path")
+      .datum(data)
+      .attr("class", "area")
+      .attr("d", area)
+      .attr("fill","steelblue");
+
+canvas.append("g")
+      .attr("class", "axis axis--x")
+      .attr("transform", "translate(0," + (height) + ")")
+      .call(xaxis);
+
+  canvas.append("g")
+      .attr("class", "axis axis--y")
+      .call(yaxis);
+
+
+ /*canvas.append("g").attr("class","axis axis--x")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xaxis);*/
+
+
+     /*  canvas.append("g")
+      .call(d3.axisLeft(yscale))
+    .append("text")
+      .attr("fill", "#000")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 0)
+      .attr("dx", "2em")
+      .attr("text-anchor", "end");*/
+
+   
+
+   var d0 = new Date(2003, 0, 1),
+      d1 = new Date(2004, 0, 1); 
+      
+  /*canvas.call(zoom).transition()
+   .duration(1500)
+   .call(  zoom.transform, d3.zoomIdentity
+    .scale(width/(xscale(d1)-xscale(d0) )  )
+.translate(-xscale(d0),0)   );*/
+
+canvas.call(zoom).transition()
+      .duration(1500)
+      .call(zoom.transform, d3.zoomIdentity
+          .scale(width / (xscale(d1) - xscale(d0)))
+          .translate(-xscale(d0), 0));
+
+
+
+
+});
+
+
+
+
+/*function zoomed(){
+      console.log("in zoomed");
+      var t = d3.event.transform ;
+      var  xt  = t.rescaleX(xscale);
+
+      canvas.select(".area").attr("d",area.x(function(d){
+        console.log(d.date);
+        console.log("fgdsjfhd"+ xt(d.date));
+        return xt(d.date);}));
+      canvas.select(".axis--x").call(d3.event.transform.rescaleX(xscale));
+    };
+*/
+
+
+function zoomed() {
+  console.log("in zoom")
+  var t = d3.event.transform, xt = t.rescaleX(xscale);
+  canvas.select(".area").attr("d", area.x(function(d) { return xt(d.date); }));
+  canvas.select(".axis--x").call(xaxis.scale(xt));
+}
+
+
+
+
+    
+function type(d) {
+  d.date = parseDate(d.date);
+  d.price = +d.price;
+  return d;
+}
+
+
+
+
+
+
+	</script>
+
+  <div>
+   
+   <h1>Dow Jones Index Over the Years </h1>
+  </div>
+
+	</body>
+
+
+
+</html>
