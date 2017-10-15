@@ -1,0 +1,141 @@
+<!doctype html>
+<html>
+<head>
+<title> D3 tutorial LineChart</title>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+</head>
+<style>
+  
+  svg {
+
+
+    margin-left : auto;
+    margin-right:auto;
+    display: block;
+  }
+
+body {
+  font: 10px sans-serif;
+}
+
+.bar rect {
+  fill: steelblue;
+  shape-rendering: crispEdges;
+}
+
+.bar text {
+  fill: #fff;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+h1 {
+
+  text-align: center;
+}
+
+  
+</style>
+
+<body>
+	<div>
+   
+   <h1>Line Chart </h1>
+  </div>
+
+	<script>
+		
+       var margin = {top:20,right:10,bottom:100,left:40} , 
+       width = 600 - margin.left - margin.right ; 
+       height = 500 - margin.top - margin.bottom ;
+
+
+       var canvas = d3.select("body").append("svg").attr("width",width + margin.left + margin.right + 100).attr("height",height + margin.top + margin.bottom).append("g").attr("transform","translate(" +margin.left +"," + margin.top+")");
+
+       var xscale = d3.scaleTime().rangeRound([0,width]);
+
+       var yscale =d3.scaleLinear().rangeRound([height,0]);
+
+       var xaxis = d3.axisBottom(xscale).tickSize(5);
+
+       var yaxis = d3.axisLeft(yscale);
+
+       var parseTime = d3.timeParse("%Y-%m-%d");
+
+       var line = d3.line().x(function(d){return xscale(d.date); }).y(function(d){return yscale(d.value); });
+
+
+
+       d3.csv("DowJones.csv",function(error, data){
+        
+        
+
+        if (error) {
+
+          console.log("Erorr loading data");
+        }
+
+        
+        data.forEach(function(d){
+          
+
+          d.date = parseTime(d.date) ;
+
+          d.value = +d.value;
+
+         //console.log(d.date);
+
+        })
+
+
+
+xscale.domain(d3.extent(data,function(d){
+
+          return d.date;
+        }));
+
+yscale.domain(d3.extent(data , function(d){return d.value;}));
+
+
+canvas.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(xscale));
+
+
+       canvas.append("g")
+      .call(d3.axisLeft(yscale))
+    .append("text")
+      .attr("fill", "#000")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 0)
+      .attr("dx", "2em")
+      .attr("text-anchor", "end");
+
+   canvas.append("path").datum(data).attr("fill","none").attr("stroke","steelblue").attr("stroke-linejoin", "round")
+      .attr("stroke-linecap", "round")
+      .attr("stroke-width", 1.5).attr("d",line);   
+
+
+
+
+
+});
+
+
+	</script>
+
+  <div>
+   
+   <h1>Dow Jones Index Over the Years </h1>
+  </div>
+
+	</body>
+
+
+
+</html>
